@@ -1,0 +1,11 @@
+# Python/runtime noise
+__pycache__/
+*.py[cod]
+.cache/
+.env
+
+# Keep PRs source-only. Binary bundles/assets are rebuilt outside git.
+*.zip
+*.glb
+*.gltf
+*.bin

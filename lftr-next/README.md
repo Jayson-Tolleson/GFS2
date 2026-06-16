@@ -50,6 +50,21 @@ LFTR Next is organized around four truth/rendering responsibilities:
 The stream currently uses JSON field patches for readability. Binary Float32Array/quantized encodings are explicit TODOs after the contract stabilizes. Mock stream rate is configured by `LFTR_MOCK_STREAM_FPS` and defaults to 1 fps; `LFTR_TARGET_STREAM_FPS` records the future 5-10 fps target.
 
 
+
+## GFS Atmosphere Provider
+
+GFS is now modeled as a **provider adapter**, not a renderer. The adapter targets NCSS-style GFS access and maps available GFS variables such as total cloud cover, precipitation rate, humidity, temperature, pressure, and u/v wind into LFTR atmosphere field truth channels. The browser still receives compact field patches; it never receives thousands of server-made cloud objects.
+
+Provider mode is controlled by `LFTR_PROVIDER_MODE=mock|live|hybrid`. Defaults are safe for offline development: `hybrid` mode with `LFTR_GFS_ENABLED=false` returns mock/degraded atmosphere frames. If live GFS fails, the provider attempts a last-good cache from `LFTR_GFS_CACHE_DIR`; if no cache exists, it returns a degraded mock frame with explicit provider metadata instead of crashing scene or stream endpoints.
+
+Debug endpoints:
+
+- `GET /gfs/api/providers/status` reports provider mode and GFS adapter status.
+- `GET /gfs/api/providers/gfs?bbox=minLon,minLat,maxLon,maxLat` returns the atmosphere frame and provider metadata.
+- `GET /gfs/api/field-truth?bbox=minLon,minLat,maxLon,maxLat` returns the encoded atmosphere field patch used by the stream.
+
+Use `scripts/check_gfs_provider.py` against a running backend to validate mock/hybrid provider behavior.
+
 ## Morphing Renderer Lifecycle
 
 The first renderer architecture intentionally avoids delete/redraw cycles:
@@ -100,8 +115,6 @@ Streams mock SSE events:
 
 - `scene.heartbeat`
 - `atmosphere.field.patch`
-- `ocean.field.patch`
-- `reports.patch`
 
 ### `WS /ws/gfs`
 
@@ -114,6 +127,7 @@ With the backend running:
 ```bash
 scripts/check_health.sh
 scripts/check_scene_snapshot.sh
+scripts/check_gfs_provider.py
 curl -N http://127.0.0.1:8787/gfs/api/stream
 ```
 

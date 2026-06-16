@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from app.services.viewport import default_viewport
+from app.fields.tiles import default_field_bbox
+from app.providers.gfs_ncss import get_gfs_provider
 
 
 LAYER_CONTRACTS = [
@@ -16,6 +18,16 @@ LAYER_CONTRACTS = [
 
 def build_mock_scene_snapshot() -> dict:
     now = datetime.now(timezone.utc).isoformat()
+    _, gfs_status = get_gfs_provider().fetch_atmosphere(default_field_bbox())
+    atmosphere_source = {
+        "source": gfs_status.details.get("source", "mock:gfs_ncss"),
+        "mode": gfs_status.mode,
+        "live_ok": gfs_status.live_ok,
+        "cache_hit": gfs_status.cache_hit,
+        "degraded": gfs_status.degraded,
+        "valid_time": gfs_status.valid_time,
+        "error": gfs_status.error,
+    }
     return {
         "ok": True,
         "scene_id": f"mock-scene-{now}",
@@ -32,8 +44,9 @@ def build_mock_scene_snapshot() -> dict:
             ],
         },
         "fields": {
-            "clouds": {"status": "mock", "patch_count": 1},
+            "clouds": {"status": "provider", "patch_count": 1, "atmosphere_provider": atmosphere_source},
             "rain": {"status": "mock", "patch_count": 1},
             "ocean": {"status": "mock", "patch_count": 1},
+            "atmosphere_provider": atmosphere_source,
         },
     }

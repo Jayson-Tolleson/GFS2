@@ -1,5 +1,5 @@
 from typing import Any, Literal
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.schemas.scene import BBox
 
 
@@ -8,7 +8,8 @@ class AtmosphereFieldFrame(BaseModel):
     valid_time: str
     grid_shape: tuple[int, int]
     levels: list[str]
-    channels: dict[Literal["cloud_density", "rain_rate", "wind_u", "wind_v", "humidity"], list[list[float]]]
+    channels: dict[str, list[list[float]]]
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class OceanFieldFrame(BaseModel):
@@ -16,7 +17,8 @@ class OceanFieldFrame(BaseModel):
     valid_time: str
     grid_shape: tuple[int, int]
     depth_levels: list[str]
-    channels: dict[Literal["sst_c", "current_u", "current_v", "bait_score"], list[list[float]]]
+    channels: dict[str, list[list[float]]]
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class FieldPatch(BaseModel):

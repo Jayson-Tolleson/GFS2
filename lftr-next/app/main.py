@@ -5,6 +5,7 @@ from app.api.routes_health import router as health_router
 from app.api.routes_scene import router as scene_router
 from app.api.routes_stream import router as stream_router
 from app.api.routes_spatial import router as spatial_router
+from app.api.routes_providers import router as providers_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 
@@ -24,6 +25,7 @@ def create_app() -> FastAPI:
     app.include_router(scene_router)
     app.include_router(stream_router)
     app.include_router(spatial_router)
+    app.include_router(providers_router)
     return app
 
 

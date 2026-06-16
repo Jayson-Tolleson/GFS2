@@ -1,0 +1,16 @@
+[Unit]
+Description=LFTR Next FastAPI ASGI service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lftr-next
+EnvironmentFile=-/opt/lftr-next/.env
+ExecStart=/opt/lftr-next/.venv/bin/python -m app.main
+Restart=always
+RestartSec=5
+User=lftr
+Group=lftr
+
+[Install]
+WantedBy=multi-user.target

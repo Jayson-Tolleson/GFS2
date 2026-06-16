@@ -4,6 +4,7 @@ from app.schemas.scene import BBox
 from app.spatial.base import SpatialFeature
 from app.spatial.csv_reports import filter_reports_by_bbox, load_reports
 from app.spatial.postgis_optional import postgis_status
+from app.spatial.usgs.ingest import load_cached_mock_waterbodies
 
 
 def parse_bbox(value: str) -> BBox:
@@ -80,6 +81,7 @@ def build_viewport_spatial(bbox: BBox, tier: str = "regional"):
         if postgis_payload and "error" not in postgis_payload:
             return postgis_payload
     status = postgis_status(settings.postgis_enabled, settings.postgis_dsn)
-    lakes = mock_lakes(bbox)
+    waterbodies = load_cached_mock_waterbodies(bbox, tier=tier)
+    lakes = [item for item in waterbodies if item.get("kind") in {"lake", "reservoir", "pond", "unknown_waterbody"}]
     harbors = mock_harbors(bbox)
-    return {"ok": True, "bbox": bbox.model_dump(), "tier": tier, "geometry_tier": tier, "spatial_mode": "mock" if settings.spatial_mode != "postgis" else "mock-fallback", "reports": [report.model_dump() for report in query_reports(bbox)], "lakes": [lake.model_dump() for lake in lakes], "waterbodies": [lake.model_dump() for lake in lakes], "harbors": [harbor.model_dump() for harbor in harbors], "coast_mask": {"id": f"coast-mask-{tier}", "status": "mock_spatial", "bbox": bbox.model_dump()}, "postgis": status, "diagnostics": {"source": "mock_spatial", "fallback": True}}
+    return {"ok": True, "bbox": bbox.model_dump(), "tier": tier, "geometry_tier": tier, "spatial_mode": "mock" if settings.spatial_mode != "postgis" else "mock-fallback", "reports": [report.model_dump() for report in query_reports(bbox)], "lakes": lakes, "waterbodies": waterbodies, "harbors": [harbor.model_dump() for harbor in harbors], "coast_mask": {"id": f"coast-mask-{tier}", "status": "mock_spatial", "bbox": bbox.model_dump()}, "postgis": status, "diagnostics": {"source": "mock_spatial", "fallback": True, "usgs": "mock_or_cache"}}

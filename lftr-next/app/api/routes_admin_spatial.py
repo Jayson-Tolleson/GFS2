@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Query
 from app.db.migrations import run_migrations
 from app.spatial.postgis_repository import PostGISSpatialRepository
 from app.spatial.viewport_query import parse_bbox
+from app.spatial.usgs.diagnostics import usgs_status
+from app.spatial.usgs.ingest import ingest_waterbodies, load_cached_mock_waterbodies
 
 router = APIRouter(prefix="/gfs/api/spatial", tags=["spatial-admin"])
 
@@ -52,6 +54,16 @@ def spatial_waterbodies(
 ) -> dict:
     parsed = bbox_from_query(bbox)
     repo = PostGISSpatialRepository()
-    if not repo.available():
-        raise HTTPException(status_code=503, detail="PostGIS unavailable or disabled")
-    return {"ok": True, "tier": tier, "waterbodies": repo.query_waterbodies(parsed, tier)}
+    if repo.available():
+        return {"ok": True, "tier": tier, "waterbodies": repo.query_waterbodies(parsed, tier), "source": "postgis"}
+    return {"ok": True, "tier": tier, "waterbodies": load_cached_mock_waterbodies(parsed, tier=tier), "source": "mock_or_cache"}
+
+
+@router.get("/usgs/status")
+def spatial_usgs_status() -> dict:
+    return {"ok": True, "usgs": usgs_status()}
+
+
+@router.post("/usgs/ingest")
+def spatial_usgs_ingest(bbox: str = Query(..., description="minLon,minLat,maxLon,maxLat")) -> dict:
+    return ingest_waterbodies(bbox_from_query(bbox))

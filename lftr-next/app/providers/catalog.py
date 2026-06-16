@@ -3,6 +3,7 @@ from app.providers.gfs_ncss import GFS_VARIABLES, build_ncss_url
 from app.providers.rtofs_aliases import aliases_used
 from app.providers.rtofs_ncep import build_rtofs_url, parse_depth_levels
 from app.fields.tiles import default_field_bbox
+from app.spatial.usgs.catalog import usgs_catalog_entry
 
 ATMOSPHERE_CHANNELS = ["cloud_density", "rain_rate", "wind_u", "wind_v", "humidity", "temperature", "pressure"]
 OCEAN_CHANNELS = ["sst_c", "current_u", "current_v", "current_speed", "current_direction", "salinity", "depth_m", "bait_score"]
@@ -56,6 +57,7 @@ def provider_catalog() -> dict:
                 "degraded": not settings.rtofs_enabled or settings.rtofs_provider_mode == "mock",
                 "todo": ["Implement bounded NOMADS/NetCDF subset parsing", "Support sample(lon, lat, depth_m, time)", "Do not download giant whole-world files in request paths"],
             },
+            "usgs_hydrography": usgs_catalog_entry(),
             "chlorophyll_ocean_color": {
                 "provider_id": "chlorophyll_ocean_color",
                 "provider_name": "Chlorophyll / Ocean Color Future Booster",

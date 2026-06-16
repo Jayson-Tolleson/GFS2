@@ -15,6 +15,7 @@ providers = catalog['providers']
 gfs = providers['gfs_ncss_atmosphere']
 rtofs = providers['rtofs_ncep_ocean']
 chl = providers['chlorophyll_ocean_color']
+usgs = providers['usgs_hydrography']
 assert gfs['configured_base_url'] and gfs['request_url_example']
 assert 'Temperature_height_above_ground' in gfs['expected_variables']
 assert 'cloud_density' in gfs['normalized_channels']
@@ -23,4 +24,6 @@ assert 'sst_c' in rtofs['normalized_channels']
 assert 'current_u' in rtofs['aliases']
 assert chl['provider_id'] == 'chlorophyll_ocean_color'
 assert chl['parser_status'] == 'disabled_future_adapter'
+assert usgs['normalized_entity'] == 'waterbody'
+assert 'mock' in usgs['source_families']
 print(json.dumps({'ok': True, 'providers': list(providers)}))

@@ -160,6 +160,22 @@ Admin/debug endpoints:
 - `GET /gfs/api/spatial/reports?bbox=minLon,minLat,maxLon,maxLat` queries report points.
 - `GET /gfs/api/spatial/waterbodies?bbox=minLon,minLat,maxLon,maxLat&tier=regional` queries simplified waterbodies.
 
+
+## USGS Hydrography / Inland Water Pass #7
+
+Pass #7 adds stable inland-water geometry only. USGS 3DHP/current hydrography should be preferred when configured, while NHDPlus HR and NHD are legacy/reference source families. Supported source adapters are `3dhp`, `nhdplus_hr`, `nhd`, `arcgis_rest`, `geojson`, `shapefile_zip`, and `mock`.
+
+The ingest normalizes source features into LFTR waterbody objects with stable IDs, source metadata, kind, area, geometry, label point, bbox, properties, and ingest batch ID. PostGIS is optional but recommended for durable stable spatial truth; mock and GeoJSON modes run without network or PostGIS.
+
+This pass does **not** add live lake temperature, inland bait scoring, boats, lightning, or a new renderer. Waterbody geometry persists independently of GFS/RTOFS weather and ocean fields.
+
+USGS endpoints and scripts:
+
+- `GET /gfs/api/spatial/usgs/status` reports sanitized config and cache/PostGIS availability.
+- `POST /gfs/api/spatial/usgs/ingest?bbox=minLon,minLat,maxLon,maxLat` runs configured ingest for a bbox.
+- `GET /gfs/api/spatial/waterbodies?bbox=minLon,minLat,maxLon,maxLat&tier=regional` returns PostGIS or mock/cache waterbodies.
+- `scripts/ingest_usgs_waterbodies.py`, `scripts/check_usgs_ingest.py`, `scripts/check_waterbody_viewport.py`, and `scripts/check_postgis_waterbodies.py` support local checks.
+
 ## API Contracts
 
 ### `GET /health`
@@ -217,6 +233,9 @@ scripts/check_postgis.py
 scripts/check_viewport_spatial.py
 scripts/check_provider_catalog.py
 scripts/check_pre7_checkpoint.sh
+scripts/check_usgs_ingest.py
+scripts/check_waterbody_viewport.py
+scripts/check_postgis_waterbodies.py
 curl -N http://127.0.0.1:8787/gfs/api/stream
 ```
 
@@ -236,6 +255,6 @@ npm run build
 
 - Implement real bounded GFS NCSS NetCDF parsing behind the existing adapter.
 - Implement real bounded RTOFS NOMADS NetCDF parsing behind the existing adapter.
-- Pass #7: add USGS/NHD lake ingest into PostGIS spatial truth.
+- Pass #7: USGS/3DHP/NHD/NHDPlus stable inland-water geometry ingest is now scaffolded; future work should add production source configs and richer validation.
 - Keep chlorophyll as a future optional bait-score booster until a dataset is selected.
 - Replace placeholder layer modules with efficient globe-native rendering.

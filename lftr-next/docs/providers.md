@@ -54,3 +54,14 @@ Possible aliases: `chlor_a`, `chlorophyll`, `chlorophyll_a`, `chlor_a_concentrat
 Normalized channel: `chlorophyll_mg_m3`.
 
 Chlorophyll is a bait-score booster, not a blocker. If chlorophyll is missing, bait score still computes from SST/current/depth. Dataset selection is TODO based on near-real-time availability, spatial resolution, cadence, coastal coverage, variable consistency, public/no-token access if possible, and ERDDAP griddap compatibility.
+
+## USGS Hydrography Stable Spatial Truth
+
+- Provider ID: `usgs_hydrography`
+- Role: stable spatial truth
+- Source families: `3dhp`, `nhdplus_hr`, `nhd`, `arcgis_rest`, `geojson`, `shapefile_zip`, `mock`
+- Normalized entity: `waterbody`
+- Status: optional spatial ingest
+- Output: PostGIS `waterbodies` table and `/gfs/api/viewport-spatial` waterbodies/lakes
+
+3DHP/current hydrography should be preferred when configured. NHDPlus HR and NHD are supported as legacy/reference families. Runtime configuration is authoritative; mock and local GeoJSON modes keep checks offline.

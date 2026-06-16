@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS {{SCHEMA}}.waterbodies (
     source_id text,
     kind text NOT NULL DEFAULT 'waterbody',
     properties jsonb NOT NULL DEFAULT '{}'::jsonb,
+    area_km2 double precision NOT NULL DEFAULT 0,
+    ingest_batch_id text,
     geom geometry(MultiPolygon, 4326) NOT NULL,
     label_point geometry(Point, 4326),
     bbox geometry(Polygon, 4326),
@@ -47,6 +49,8 @@ CREATE INDEX IF NOT EXISTS waterbodies_geom_gix ON {{SCHEMA}}.waterbodies USING 
 CREATE INDEX IF NOT EXISTS waterbodies_label_gix ON {{SCHEMA}}.waterbodies USING gist (label_point);
 CREATE INDEX IF NOT EXISTS waterbodies_kind_idx ON {{SCHEMA}}.waterbodies (kind);
 CREATE INDEX IF NOT EXISTS waterbodies_source_idx ON {{SCHEMA}}.waterbodies (source, source_id);
+CREATE INDEX IF NOT EXISTS waterbodies_stable_id_idx ON {{SCHEMA}}.waterbodies (stable_id);
+CREATE INDEX IF NOT EXISTS waterbodies_ingest_batch_idx ON {{SCHEMA}}.waterbodies (ingest_batch_id);
 
 CREATE TABLE IF NOT EXISTS {{SCHEMA}}.harbors (
     id bigserial PRIMARY KEY,
@@ -109,3 +113,7 @@ CREATE INDEX IF NOT EXISTS spatial_tiles_geom_gix ON {{SCHEMA}}.spatial_tiles US
 CREATE INDEX IF NOT EXISTS spatial_tiles_label_gix ON {{SCHEMA}}.spatial_tiles USING gist (label_point);
 CREATE INDEX IF NOT EXISTS spatial_tiles_kind_idx ON {{SCHEMA}}.spatial_tiles (kind);
 CREATE INDEX IF NOT EXISTS spatial_tiles_source_idx ON {{SCHEMA}}.spatial_tiles (source, source_id);
+
+ALTER TABLE IF EXISTS {{SCHEMA}}.waterbodies ADD COLUMN IF NOT EXISTS area_km2 double precision NOT NULL DEFAULT 0;
+ALTER TABLE IF EXISTS {{SCHEMA}}.waterbodies ADD COLUMN IF NOT EXISTS ingest_batch_id text;
+CREATE INDEX IF NOT EXISTS waterbodies_ingest_batch_idx ON {{SCHEMA}}.waterbodies (ingest_batch_id);

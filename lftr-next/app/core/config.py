@@ -39,6 +39,22 @@ class Settings(BaseSettings):
     chl_dataset_id: str = ""
     chl_ttl_seconds: int = 21600
     chl_cache_dir: str = "data/cache/chlorophyll"
+    usgs_enabled: bool = False
+    usgs_source_family: str = "mock"
+    usgs_cache_dir: str = "data/cache/usgs"
+    usgs_timeout_seconds: float = 30.0
+    usgs_max_features: int = 5000
+    usgs_min_area_km2_global: float = 5.0
+    usgs_min_area_km2_regional: float = 0.25
+    usgs_min_area_km2_local: float = 0.01
+    usgs_simplify_global: float = 0.01
+    usgs_simplify_regional: float = 0.0025
+    usgs_simplify_local: float = 0.0005
+    usgs_arcgis_url: str = ""
+    usgs_arcgis_layer: str = ""
+    usgs_geojson_path: str = ""
+    usgs_shapefile_zip_path: str = ""
+    usgs_default_bbox: str = "-125,32,-117,38"
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="LFTR_")
 

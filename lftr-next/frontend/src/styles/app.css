@@ -21,3 +21,7 @@ html, body, #app { height: 100%; margin: 0; font-family: Inter, system-ui, sans-
 .selected-report p { margin: 0 0 4px; }
 .report-list ul { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
 .glowing-report { border-left: 2px solid #67e8f9; padding: 6px 8px; background: rgba(103,232,249,.10); box-shadow: 0 0 18px rgba(103,232,249,.18); border-radius: 8px; }
+.bait-field-glow { width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: radial-gradient(circle, rgba(251,191,36,.75), rgba(251,191,36,.08) 68%); box-shadow: 0 0 26px rgba(251,191,36,.35); }
+.boat-marker { width: 0; height: 0; margin: -8px 0 0 -6px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 18px solid rgba(255,255,255,.92); filter: drop-shadow(0 0 8px rgba(125,211,252,.65)); }
+.lightning-flash { width: 18px; height: 18px; margin: -9px 0 0 -9px; clip-path: polygon(45% 0, 85% 0, 62% 42%, 100% 42%, 34% 100%, 48% 55%, 12% 55%); background: #fde047; box-shadow: 0 0 28px #fde047; }
+.inland-water-marker { min-width: 28px; min-height: 14px; margin: -7px 0 0 -14px; border-radius: 999px; background: rgba(56,189,248,.28); border: 1px solid rgba(125,211,252,.65); box-shadow: 0 0 18px rgba(56,189,248,.35); color: rgba(240,249,255,.75); font-size: 9px; padding: 2px 6px; white-space: nowrap; }

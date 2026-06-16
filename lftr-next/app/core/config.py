@@ -55,6 +55,11 @@ class Settings(BaseSettings):
     usgs_geojson_path: str = ""
     usgs_shapefile_zip_path: str = ""
     usgs_default_bbox: str = "-125,32,-117,38"
+    lightning_enabled: bool = False
+    lightning_provider: str = "mock"
+    lightning_ttl_seconds: int = 120
+    lightning_max_flashes: int = 50
+    lightning_cache_dir: str = "data/cache/lightning"
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="LFTR_")
 

@@ -3,6 +3,7 @@ from app.services.viewport import default_viewport
 from app.fields.tiles import default_field_bbox
 from app.providers.gfs_ncss import get_gfs_provider
 from app.providers.rtofs_ncep import get_rtofs_provider
+from app.layers.compiler import layer_status
 
 
 LAYER_CONTRACTS = [
@@ -40,13 +41,14 @@ def build_mock_scene_snapshot() -> dict:
         "depth_levels": rtofs_status.details.get("depth_levels", []),
         "error": rtofs_status.error,
     }
+    compiled_layers = layer_status()
     return {
         "ok": True,
         "scene_id": f"mock-scene-{now}",
         "generated_at": now,
         "bbox": {"west": -87.8, "south": 18.0, "east": -73.0, "north": 32.5},
         "viewport": default_viewport(),
-        "layers": LAYER_CONTRACTS,
+        "layers": compiled_layers["layers"],
         "spatial": {
             "projection": "WGS84",
             "postgis": {"status": "placeholder", "todo": "wire place-aware spatial queries"},
@@ -55,6 +57,10 @@ def build_mock_scene_snapshot() -> dict:
                 {"id": "mock-gulf-stream", "type": "current-axis", "lat": 26.4, "lon": -79.6},
             ],
         },
+        "route_contract_version": "lftr.scene.v1",
+        "renderer": {"budgets": compiled_layers["layers"], "expectations": compiled_layers["renderer_expectations"]},
+        "provider_status": compiled_layers["providers"],
+        "spatial_status": compiled_layers["spatial"],
         "fields": {
             "clouds": {"status": "provider", "patch_count": 1, "atmosphere_provider": atmosphere_source},
             "rain": {"status": "mock", "patch_count": 1},

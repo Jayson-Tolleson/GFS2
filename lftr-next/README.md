@@ -161,6 +161,20 @@ Admin/debug endpoints:
 - `GET /gfs/api/spatial/waterbodies?bbox=minLon,minLat,maxLon,maxLat&tier=regional` queries simplified waterbodies.
 
 
+
+## Visual Layer Contracts (#8)
+
+Pass #8 adds clean visual layer contracts and first lightweight adapters over existing truth systems. Clouds/rain sample atmosphere fields; ocean/current sample ocean fields; bait is a bounded scalar-field glow from `bait_score`; boats are stable viewport entities generated from viewport/spatial/ocean-current truth; lightning is a short-lived TTL event layer; inland water consumes stable USGS/PostGIS waterbody IDs and labels; reports remain CSV/PostGIS spatial points.
+
+The renderer flow remains `snapshot → stream → field store → target state → animation loop → morphing object pools`. This pass does not add broadcast/watch, WebRTC, STT, AI chat, full NOAA/RTOFS parsers, or giant legacy frontend code.
+
+Layer endpoints:
+
+- `GET /gfs/api/layers/status` returns layer contracts, budgets, provider/spatial status, and renderer expectations.
+- `GET /gfs/api/layers/boats?bbox=minLon,minLat,maxLon,maxLat` returns deterministic stable viewport boats.
+- `GET /gfs/api/layers/lightning?bbox=minLon,minLat,maxLon,maxLat` returns TTL mock/GLM-style flashes.
+- `GET /gfs/api/layers/bait?bbox=minLon,minLat,maxLon,maxLat` summarizes field-derived bait score metadata.
+
 ## USGS Hydrography / Inland Water Pass #7
 
 Pass #7 adds stable inland-water geometry only. USGS 3DHP/current hydrography should be preferred when configured, while NHDPlus HR and NHD are legacy/reference source families. Supported source adapters are `3dhp`, `nhdplus_hr`, `nhd`, `arcgis_rest`, `geojson`, `shapefile_zip`, and `mock`.
@@ -236,6 +250,8 @@ scripts/check_pre7_checkpoint.sh
 scripts/check_usgs_ingest.py
 scripts/check_waterbody_viewport.py
 scripts/check_postgis_waterbodies.py
+scripts/check_layers.py
+scripts/check_bait_boats_lightning.py
 curl -N http://127.0.0.1:8787/gfs/api/stream
 ```
 

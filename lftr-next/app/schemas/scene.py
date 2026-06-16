@@ -21,7 +21,7 @@ class SceneLayer(BaseModel):
     id: str
     label: str
     enabled: bool = True
-    kind: Literal["field", "entity", "report"]
+    kind: Literal["field", "scalar_field", "entity", "spatial", "event", "spatial_points", "report"]
 
 
 class SceneSnapshot(BaseModel):

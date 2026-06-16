@@ -1,1 +1,1 @@
-export interface FieldStreamEvent { type: 'scene.heartbeat' | 'atmosphere.field.patch' | 'ocean.field.patch' | 'reports.patch' | 'stream.error'; id?: string; payload: Record<string, unknown>; receivedAt: string; }
+export interface FieldStreamEvent { type: 'scene.heartbeat' | 'atmosphere.field.patch' | 'ocean.field.patch' | 'reports.patch' | 'lightning.flash' | 'boats.patch' | 'stream.error'; id?: string; payload: Record<string, unknown>; receivedAt: string; }

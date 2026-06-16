@@ -5,8 +5,10 @@ from typing import AsyncIterator
 from app.core.config import get_settings
 from app.fields.tiles import default_field_bbox
 from app.services.field_truth_engine import get_field_truth_engine
+from app.services.boat_generator import generate_viewport_boats
+from app.services.lightning_service import lightning_flashes
 
-MOCK_EVENTS = ["scene.heartbeat", "atmosphere.field.patch", "ocean.field.patch"]
+MOCK_EVENTS = ["scene.heartbeat", "atmosphere.field.patch", "ocean.field.patch", "lightning.flash", "boats.patch"]
 
 
 def sse_message(event: str, event_id: int, payload: dict) -> str:
@@ -27,6 +29,10 @@ async def mock_sse_events() -> AsyncIterator[str]:
         elif event == "ocean.field.patch":
             patch, _ = engine.ocean_patch(bbox)
             payload = patch.model_dump(mode="json")
+        elif event == "lightning.flash":
+            payload = lightning_flashes(bbox)
+        elif event == "boats.patch":
+            payload = generate_viewport_boats(bbox, count=6)
         else:
             payload = {
                 "ok": True,

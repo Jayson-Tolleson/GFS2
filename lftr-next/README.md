@@ -65,6 +65,22 @@ Debug endpoints:
 
 Use `scripts/check_gfs_provider.py` against a running backend to validate mock/hybrid provider behavior.
 
+
+## RTOFS Ocean Provider
+
+RTOFS is the ocean field-truth provider. Like GFS, it is an adapter that feeds compact backend fields rather than rendered objects. The ocean renderer samples those fields client-side for current streamlets, SST hints, bait glow, and future boat orientation.
+
+The RTOFS provider is safe by default: `LFTR_RTOFS_PROVIDER_MODE=hybrid` and `LFTR_RTOFS_ENABLED=false` return degraded mock ocean truth with explicit metadata. Live RTOFS failures fall back to last-good cache from `LFTR_RTOFS_CACHE_DIR`; if no cache exists, the provider returns mock ocean fields and never crashes scene or stream endpoints.
+
+Ocean truth channels include `sst_c`, `current_u`, `current_v`, and derived `bait_score`, plus optional/diagnostic `salinity`, `depth_m`, `current_speed`, and `current_direction`. Bait score is a deterministic scalar field derived from SST suitability, current-speed suitability, and optional depth suitability. Chlorophyll is reserved as a future booster and does not block rendering.
+
+The provider interface is depth-ready for future 3D truth via `sample(lon, lat, depth_m, time)`. This pass begins with surface data (`depth 0` / `surface`) while preserving depth-level metadata and aliases for SST, current vectors, salinity, and depth.
+
+Debug scripts:
+
+- `scripts/check_rtofs_provider.py` validates `/gfs/api/providers/rtofs`.
+- `scripts/check_ocean_truth.py` validates the encoded ocean field-truth patch from `/gfs/api/field-truth`.
+
 ## Morphing Renderer Lifecycle
 
 The first renderer architecture intentionally avoids delete/redraw cycles:
@@ -115,6 +131,7 @@ Streams mock SSE events:
 
 - `scene.heartbeat`
 - `atmosphere.field.patch`
+- `ocean.field.patch`
 
 ### `WS /ws/gfs`
 
@@ -128,6 +145,8 @@ With the backend running:
 scripts/check_health.sh
 scripts/check_scene_snapshot.sh
 scripts/check_gfs_provider.py
+scripts/check_rtofs_provider.py
+scripts/check_ocean_truth.py
 curl -N http://127.0.0.1:8787/gfs/api/stream
 ```
 

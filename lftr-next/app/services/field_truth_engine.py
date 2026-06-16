@@ -3,6 +3,7 @@ from app.fields.encoders import encode_atmosphere_json_patch
 from app.providers.gfs_ncss import get_gfs_provider
 from app.providers.provider_status import ProviderStatus
 from app.schemas.scene import BBox
+from app.services.ocean_truth_engine import get_ocean_truth_engine
 
 
 class FieldTruthEngine:
@@ -15,6 +16,9 @@ class FieldTruthEngine:
         patch.payload["provider"] = status.model_dump(mode="json")
         patch.payload["metadata"] = frame.metadata
         return patch, status
+
+    def ocean_patch(self, bbox: BBox, lod: int = 0) -> tuple[FieldPatch, ProviderStatus]:
+        return get_ocean_truth_engine().ocean_patch(bbox, lod=lod)
 
 
 def get_field_truth_engine() -> FieldTruthEngine:

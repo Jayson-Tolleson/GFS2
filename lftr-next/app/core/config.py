@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     gfs_ttl_seconds: int = 900
     gfs_max_grid_points: int = 256
     gfs_cache_dir: str = ".cache/gfs"
+    rtofs_enabled: bool = False
+    rtofs_nomads_base: str = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/rtofs/prod"
+    rtofs_timeout_seconds: float = 8.0
+    rtofs_ttl_seconds: int = 900
+    rtofs_cache_dir: str = ".cache/rtofs"
+    rtofs_depth_levels: str = "surface"
+    rtofs_max_grid_points: int = 256
+    rtofs_provider_mode: str = "hybrid"
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="LFTR_")
 

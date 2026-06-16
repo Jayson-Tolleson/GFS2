@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from app.services.viewport import default_viewport
 from app.fields.tiles import default_field_bbox
 from app.providers.gfs_ncss import get_gfs_provider
+from app.providers.rtofs_ncep import get_rtofs_provider
 
 
 LAYER_CONTRACTS = [
@@ -19,6 +20,7 @@ LAYER_CONTRACTS = [
 def build_mock_scene_snapshot() -> dict:
     now = datetime.now(timezone.utc).isoformat()
     _, gfs_status = get_gfs_provider().fetch_atmosphere(default_field_bbox())
+    _, rtofs_status = get_rtofs_provider().fetch_ocean(default_field_bbox())
     atmosphere_source = {
         "source": gfs_status.details.get("source", "mock:gfs_ncss"),
         "mode": gfs_status.mode,
@@ -27,6 +29,16 @@ def build_mock_scene_snapshot() -> dict:
         "degraded": gfs_status.degraded,
         "valid_time": gfs_status.valid_time,
         "error": gfs_status.error,
+    }
+    ocean_source = {
+        "source": rtofs_status.details.get("source", "mock:rtofs_ncep"),
+        "mode": rtofs_status.mode,
+        "live_ok": rtofs_status.live_ok,
+        "cache_hit": rtofs_status.cache_hit,
+        "degraded": rtofs_status.degraded,
+        "valid_time": rtofs_status.valid_time,
+        "depth_levels": rtofs_status.details.get("depth_levels", []),
+        "error": rtofs_status.error,
     }
     return {
         "ok": True,
@@ -46,7 +58,8 @@ def build_mock_scene_snapshot() -> dict:
         "fields": {
             "clouds": {"status": "provider", "patch_count": 1, "atmosphere_provider": atmosphere_source},
             "rain": {"status": "mock", "patch_count": 1},
-            "ocean": {"status": "mock", "patch_count": 1},
+            "ocean": {"status": "provider", "patch_count": 1, "ocean_provider": ocean_source},
             "atmosphere_provider": atmosphere_source,
+            "ocean_provider": ocean_source,
         },
     }

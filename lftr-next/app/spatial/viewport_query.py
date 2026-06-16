@@ -32,15 +32,55 @@ def mock_harbors() -> list[SpatialFeature]:
     ]
 
 
-def build_viewport_spatial(bbox: BBox, tier: str = "regional") -> ViewportSpatialResponse:
+def _postgis_response(bbox: BBox, tier: str):
+    from app.spatial.postgis_repository import PostGISSpatialRepository
+    repo = PostGISSpatialRepository()
+    if not repo.available():
+        return None
+    try:
+        reports = repo.query_reports(bbox)
+        waterbodies = repo.query_waterbodies(bbox, tier)
+        harbors = repo.query_harbors(bbox)
+        coast_mask = repo.query_coast_mask(bbox, tier) or {"id": f"coast-mask-{tier}", "status": "postgis-empty"}
+        status = repo.status()
+        return {
+            "ok": True,
+            "bbox": bbox.model_dump(),
+            "tier": tier,
+            "geometry_tier": tier,
+            "spatial_mode": "postgis",
+            "reports": reports,
+            "lakes": waterbodies,
+            "waterbodies": waterbodies,
+            "harbors": harbors,
+            "coast_mask": coast_mask,
+            "postgis": {k: v for k, v in status.items() if k != "dsn"},
+            "diagnostics": {"source": "postgis", "fallback": False},
+        }
+    except Exception as exc:
+        if get_settings().spatial_mode == "postgis":
+            raise
+        return {"error": str(exc)}
+
+
+def build_viewport_spatial(bbox: BBox, tier: str = "regional"):
     settings = get_settings()
-    return ViewportSpatialResponse(
-        ok=True,
-        bbox=bbox,
-        tier=tier,
-        reports=query_reports(bbox),
-        lakes=mock_lakes(),
-        harbors=mock_harbors(),
-        coast_mask={"id": f"coast-mask-{tier}", "status": "mock", "bbox": bbox.model_dump()},
-        postgis=postgis_status(settings.postgis_enabled, settings.postgis_dsn),
-    )
+    if settings.spatial_mode in {"postgis", "hybrid"}:
+        postgis_payload = _postgis_response(bbox, tier)
+        if postgis_payload and "error" not in postgis_payload:
+            return postgis_payload
+    status = postgis_status(settings.postgis_enabled, settings.postgis_dsn)
+    return {
+        "ok": True,
+        "bbox": bbox.model_dump(),
+        "tier": tier,
+        "geometry_tier": tier,
+        "spatial_mode": "mock" if settings.spatial_mode != "postgis" else "mock-fallback",
+        "reports": [report.model_dump() for report in query_reports(bbox)],
+        "lakes": [lake.model_dump() for lake in mock_lakes()],
+        "waterbodies": [lake.model_dump() for lake in mock_lakes()],
+        "harbors": [harbor.model_dump() for harbor in mock_harbors()],
+        "coast_mask": {"id": f"coast-mask-{tier}", "status": "mock", "bbox": bbox.model_dump()},
+        "postgis": status,
+        "diagnostics": {"source": "mock_csv", "fallback": True},
+    }

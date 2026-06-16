@@ -10,6 +10,12 @@ class Settings(BaseSettings):
     google_maps_api_key: str = ""
     postgis_dsn: str | None = None
     postgis_enabled: bool = False
+    postgis_schema: str = "lftr"
+    spatial_mode: str = "mock"
+    spatial_tile_deg: float = 1.0
+    geometry_simplify_global: float = 0.2
+    geometry_simplify_regional: float = 0.05
+    geometry_simplify_local: float = 0.005
     mock_stream_fps: float = 1.0
     target_stream_fps: str = "5-10"
     provider_mode: str = "hybrid"

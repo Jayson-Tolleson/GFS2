@@ -94,6 +94,36 @@ The first renderer architecture intentionally avoids delete/redraw cycles:
 
 Budgets are tiered as `global`, `regional`, and `local` so the renderer never creates unbounded particles or markers. Cloud placeholders sample `cloud_density` with wind advection TODO hooks from `wind_u`/`wind_v`; rain placeholders sample `rain_rate`; ocean placeholders sample `sst_c`, `current_u`/`current_v`, and `bait_score`.
 
+
+## PostGIS Stable Spatial Truth
+
+PostGIS is optional and owns stable place/world geometry only: coast and land-water masks, harbors, lakes/waterbodies, islands, spatial tiles, label anchors, simplified tier geometries, viewport intersections, and CSV report points. It must not store high-frequency GFS/RTOFS field frames.
+
+Responsibilities remain split:
+
+- **PostGIS = stable place truth** with spatial indexes and viewport queries.
+- **GFS/RTOFS = moving field truth** for atmosphere, ocean, bait score, current, and SST fields.
+- **Google `<gmp-map-3d>` = base world renderer** for terrain/buildings.
+- **TypeScript renderer = morphing display layer** with object pools, field sampling, and budgets.
+
+Safe defaults keep the app runnable without a database: `LFTR_SPATIAL_MODE=mock`, `LFTR_POSTGIS_ENABLED=false`, and no DSN required. In `hybrid` mode, viewport spatial queries use PostGIS when available and fall back to CSV/mock data without exposing the DSN.
+
+PostGIS utilities:
+
+- `scripts/install_postgis.sh` prints conservative Ubuntu/Debian install notes and runs migrations only when `LFTR_POSTGIS_DSN` is configured.
+- `scripts/migrate_postgis.py` runs idempotent schema creation without destroying data.
+- `scripts/load_reports_to_postgis.py` loads `data/reports.csv` into `spatial_reports`.
+- `scripts/check_postgis.py` reports sanitized PostGIS status.
+- `scripts/check_viewport_spatial.py` validates `/gfs/api/viewport-spatial`.
+
+Admin/debug endpoints:
+
+- `GET /gfs/api/spatial/status` returns sanitized spatial/PostGIS status.
+- `POST /gfs/api/spatial/migrate` runs idempotent migrations when DB access is configured.
+- `POST /gfs/api/spatial/load-reports` loads CSV reports into PostGIS.
+- `GET /gfs/api/spatial/reports?bbox=minLon,minLat,maxLon,maxLat` queries report points.
+- `GET /gfs/api/spatial/waterbodies?bbox=minLon,minLat,maxLon,maxLat&tier=regional` queries simplified waterbodies.
+
 ## API Contracts
 
 ### `GET /health`
@@ -123,7 +153,7 @@ Returns CSV-backed report points inside the requested bbox. If `data/reports.csv
 
 ### `GET /gfs/api/viewport-spatial?bbox=minLon,minLat,maxLon,maxLat&tier=regional`
 
-Returns reports, mock lakes, mock harbors, mock coast mask metadata, PostGIS status, and stable IDs for viewport-aware spatial truth.
+Returns reports, waterbodies/lakes, harbors, coast mask metadata, spatial mode, sanitized PostGIS status, geometry tier, stable IDs, and diagnostics for viewport-aware spatial truth.
 
 ### `GET /gfs/api/stream`
 
@@ -147,6 +177,8 @@ scripts/check_scene_snapshot.sh
 scripts/check_gfs_provider.py
 scripts/check_rtofs_provider.py
 scripts/check_ocean_truth.py
+scripts/check_postgis.py
+scripts/check_viewport_spatial.py
 curl -N http://127.0.0.1:8787/gfs/api/stream
 ```
 

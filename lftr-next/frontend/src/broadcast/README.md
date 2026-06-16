@@ -1,16 +1,16 @@
 # `frontend/src/broadcast`
 
-This directory is a placeholder for future pass #9 broadcast/watch frontend code.
+This directory contains the compact pass #9 broadcast/watch frontend runtime.
 
-Do not copy legacy giant JavaScript files here. Do not import the globe renderer by default. Future files should be small modules for broadcaster UI, watcher UI, chat, media, signaling, STT, uploads, and optional web-search panes.
+It intentionally does not import the globe renderer, field store, marine layer modules, Google map modules, or the globe scene API. The Vite entries are `broadcast.html` and `watch.html`.
 
-Planned files:
+Current files:
 
-- `broadcastApp.ts`
-- `watchApp.ts`
-- `chat.ts`
-- `media.ts`
-- `signaling.ts`
-- `stt.ts`
-- `uploads.ts`
-- `webSearchPane.ts`
+- `broadcastApp.ts` — broadcaster UI with camera, microphone, STT hook, chat, and placeholders.
+- `watchApp.ts` — watcher UI with muted playback, collapsible chat, and placeholders.
+- `chat.ts` — shared sanitized chat socket client.
+- `media.ts` — browser camera/microphone helper.
+- `signaling.ts` — small JSON WebSocket helper.
+- `stt.ts` — browser STT capability hook.
+- `uploads.ts` — disabled upload placeholder hook.
+- `webSearchPane.ts` — disabled web/search placeholder hook.

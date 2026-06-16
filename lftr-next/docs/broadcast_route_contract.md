@@ -1,6 +1,6 @@
 # Broadcast/Watch Route Contract
 
-This is the required clean contract for future pass #9. The current checkpoint documents the contract only; it does not activate these routes.
+This is the required clean contract for future pass #9. Pass #9 implements these routes as the only broadcast/watch runtime surface.
 
 ## Final user surfaces
 

@@ -1,6 +1,6 @@
 # LFTR Broadcast/Watch Migration Plan
 
-This document is the clean-room plan for future pass #9. It does **not** enable `/broadcast`, `/watch`, or any broadcast WebSocket in the active `lftr-next` runtime.
+This document was the clean-room plan for pass #9 and remains the guardrail for the implemented compact runtime. Pass #9 intentionally enables only `/broadcast`, `/watch`, `/ws/broadcast`, `/ws/watch`, `/ws/chat`, and `/api/broadcast/status`.
 
 ## Current boundary
 
@@ -100,6 +100,6 @@ Broadcast/watch must not import the globe renderer by default. The globe app mus
 - Upload helper.
 - Status panel helper.
 
-## What pass #9 should do next
+## Pass #9 runtime status
 
-Pass #9 should implement the minimal disabled-to-enabled broadcast/watch runtime from this contract, with tests proving no duplicate route aliases, no duplicate socket loops, and no globe renderer dependency on broadcast pages.
+The runtime now implements the minimal broadcast/watch contract with tests proving no duplicate route aliases, no duplicate socket loops, and no globe renderer dependency on broadcast pages. Future passes may add real uploads, server-side AI integrations, and production WebRTC media handling without changing the route contract.

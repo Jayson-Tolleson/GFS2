@@ -1,0 +1,25 @@
+import '../styles/broadcast.css';
+import { BroadcastChat } from './chat';
+import { BroadcastMedia } from './media';
+import { JsonSocket } from './signaling';
+import { SttHook } from './stt';
+import { bindUploadPlaceholder } from './uploads';
+import { bindWebSearchPlaceholder } from './webSearchPane';
+
+const root = document.querySelector<HTMLElement>('#broadcast-app') ?? document.body;
+root.innerHTML = `<main class="broadcast-shell"><section class="stage"><header><h1>LFTR Broadcast</h1></header><video id="preview" playsinline muted></video><footer><button id="camera">Start Camera</button><button id="stop">Stop Camera</button><button id="switch">Switch Camera</button><button id="mic">Mic Check</button><button id="stt">Start STT</button></footer></section><aside class="panel"><header><h2>Broadcaster Chat</h2></header><div class="status" id="status">booting</div><div class="hooks"><button id="ai">AI placeholder</button> <button id="upload">Upload hook</button> <button id="search">Search hook</button></div><div class="chat-log" id="chat"></div><form class="chat-form" id="form"><input id="text" placeholder="Message" autocomplete="off"><button>Send</button></form><div class="debug" id="debug">No GFS renderer loaded.</div></aside></main>`;
+const status = (line: string) => { document.querySelector('#status')!.textContent = line; };
+const debug = (line: string) => { document.querySelector('#debug')!.textContent = line; };
+const room = new URLSearchParams(location.search).get('room') ?? 'default';
+const signal = new JsonSocket('/ws/broadcast', (msg) => debug(`${msg.family ?? 'signal'}:${msg.type}`), status); signal.connect(room);
+const chat = new BroadcastChat(document.querySelector<HTMLElement>('#chat')!, status); chat.connect(room);
+const media = new BroadcastMedia(document.querySelector('#preview')!, status);
+document.querySelector<HTMLButtonElement>('#camera')!.onclick = () => media.startCamera();
+document.querySelector<HTMLButtonElement>('#stop')!.onclick = () => media.stopCamera();
+document.querySelector<HTMLButtonElement>('#switch')!.onclick = () => media.switchCamera();
+document.querySelector<HTMLButtonElement>('#mic')!.onclick = () => media.startMicrophoneOnly();
+const stt = new SttHook((text) => chat.sendTranscript(text), status); document.querySelector<HTMLButtonElement>('#stt')!.onclick = () => stt.start();
+document.querySelector<HTMLButtonElement>('#ai')!.onclick = () => chat.requestAi();
+bindUploadPlaceholder(document.querySelector<HTMLButtonElement>('#upload')!, status, () => chat.sendUploadPlaceholder());
+bindWebSearchPlaceholder(document.querySelector<HTMLButtonElement>('#search')!, status);
+document.querySelector<HTMLFormElement>('#form')!.onsubmit = (event) => { event.preventDefault(); const input = document.querySelector<HTMLInputElement>('#text')!; chat.send(input.value, 'Broadcaster'); input.value = ''; };

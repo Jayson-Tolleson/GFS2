@@ -252,6 +252,10 @@ scripts/check_waterbody_viewport.py
 scripts/check_postgis_waterbodies.py
 scripts/check_layers.py
 scripts/check_bait_boats_lightning.py
+scripts/check_broadcast_migration_plan.py
+scripts/check_broadcast_routes.py
+scripts/check_broadcast_runtime.py
+scripts/check_broadcast_frontend.py
 curl -N http://127.0.0.1:8787/gfs/api/stream
 ```
 
@@ -274,3 +278,24 @@ npm run build
 - Pass #7: USGS/3DHP/NHD/NHDPlus stable inland-water geometry ingest is now scaffolded; future work should add production source configs and richer validation.
 - Keep chlorophyll as a future optional bait-score booster until a dataset is selected.
 - Replace placeholder layer modules with efficient globe-native rendering.
+
+## Broadcast/Watch Runtime (#9)
+
+Pass #9 adds a compact broadcast/watch runtime that is isolated from the GFS globe renderer. The globe continues to use `/gfs`, `/gfs/api/scene-frame`, `/gfs/api/stream`, and `/ws/gfs`; broadcast/watch uses only `/broadcast`, `/watch`, `/ws/broadcast`, `/ws/watch`, `/ws/chat`, and `/api/broadcast/status`.
+
+The runtime intentionally avoids legacy route sprawl: there are no `/broadcast2` or `/watch2` routes, no old GFS-prefixed broadcast aliases, and no duplicated chat sockets or media-loop routes. Broadcast/watch pages do not import `frontend/src/renderer/*`, `frontend/src/fields/*`, Google map modules, or `/gfs/api/scene-frame`.
+
+### Broadcast routes
+
+- `GET /broadcast` returns the broadcaster page.
+- `GET /watch` returns the watcher page.
+- `GET /api/broadcast/status` returns safe room/socket status without secrets.
+- `WS /ws/broadcast` handles broadcaster presence, media status, and signaling relay.
+- `WS /ws/watch` handles watcher presence and signaling relay back to the broadcaster.
+- `WS /ws/chat` handles sanitized chat, STT transcript events, AI placeholders, upload metadata placeholders, web/search placeholders, debug, and system notices.
+
+### Frontend behavior
+
+The broadcaster page has camera preview, start/stop camera, front/back camera switching, microphone permission check, chat, STT browser hook, AI/upload/web-search placeholders, and status/debug panels. The watcher page has a muted autoplay-friendly video element, collapsible chat panel, Enter-to-send chat, upload/search placeholders, and playback/debug status.
+
+Server-side STT, external AI APIs, and real upload storage are intentionally deferred. The current upload path is a bounded placeholder: chat can carry upload metadata, but no file endpoint is enabled by default.

@@ -60,6 +60,10 @@ class Settings(BaseSettings):
     lightning_ttl_seconds: int = 120
     lightning_max_flashes: int = 50
     lightning_cache_dir: str = "data/cache/lightning"
+    broadcast_default_room: str = "default"
+    broadcast_max_message_chars: int = 2000
+    broadcast_uploads_enabled: bool = False
+    broadcast_upload_dir: str = "data/uploads/broadcast"
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="LFTR_")
 

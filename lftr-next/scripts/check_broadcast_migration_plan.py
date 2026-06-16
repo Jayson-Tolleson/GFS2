@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate that pass #9 broadcast/watch remains a documentation-only plan."""
+"""Validate that pass #9 broadcast/watch follows the clean-room migration plan."""
 from __future__ import annotations
 
 import importlib
@@ -24,15 +24,12 @@ REQUIRED_CONTRACT_STRINGS = [
     "/ws/chat",
     "/api/broadcast/status",
 ]
-FORBIDDEN_ACTIVE_STRINGS = [
-    "@router.get(\"/broadcast",
-    "@router.get('/broadcast",
-    "@app.get(\"/broadcast",
-    "@app.get('/broadcast",
-    "@router.websocket(\"/ws/broadcast",
-    "@router.websocket('/ws/broadcast",
-    "@app.websocket(\"/ws/broadcast",
-    "@app.websocket('/ws/broadcast",
+FORBIDDEN_ROUTE_STRINGS = ["/broadcast2", "/watch2"]
+REQUIRED_RUNTIME_FILES = [
+    ROOT / "app/api/routes_broadcast.py",
+    ROOT / "app/broadcast/routes.py",
+    ROOT / "frontend/src/broadcast/broadcastApp.ts",
+    ROOT / "frontend/src/broadcast/watchApp.ts",
 ]
 FORBIDDEN_BROADCAST_FRONTEND_DEPENDENCIES = [
     "../renderer",
@@ -65,15 +62,14 @@ def main() -> None:
     if "no gfs renderer loaded by default" not in plan_doc:
         fail("migration plan must state that no GFS renderer loads by default")
 
-    active_route_files = [ROOT / "app/main.py", *sorted((ROOT / "app/api").glob("*.py"))]
-    active_hits: list[str] = []
-    for path in active_route_files:
-        text = read(path)
-        for needle in FORBIDDEN_ACTIVE_STRINGS:
-            if needle in text:
-                active_hits.append(f"{path.relative_to(ROOT)} contains {needle}")
-    if active_hits:
-        fail(f"active broadcast/watch runtime routes were added: {active_hits}")
+    missing_runtime = [str(path.relative_to(ROOT)) for path in REQUIRED_RUNTIME_FILES if not path.exists()]
+    if missing_runtime:
+        fail(f"missing expected pass #9 runtime files: {missing_runtime}")
+
+    active_route_text = "\n".join(read(path) for path in [ROOT / "app/main.py", *sorted((ROOT / "app/api").glob("*.py"))])
+    forbidden_routes = [needle for needle in FORBIDDEN_ROUTE_STRINGS if needle in active_route_text]
+    if forbidden_routes:
+        fail(f"forbidden duplicate broadcast/watch routes were added: {forbidden_routes}")
 
     broadcast_frontend = ROOT / "frontend/src/broadcast"
     disallowed_files = []
@@ -82,8 +78,6 @@ def main() -> None:
         if path.is_dir():
             continue
         rel = path.relative_to(broadcast_frontend)
-        if rel.name not in {"README.md", ".gitkeep"}:
-            disallowed_files.append(str(path.relative_to(ROOT)))
         if path.stat().st_size > 25_000:
             disallowed_files.append(f"{path.relative_to(ROOT)} is too large")
         text = read(path).lower() if path.suffix in {".md", ".ts", ".js", ".tsx", ".jsx"} else ""
@@ -102,7 +96,7 @@ def main() -> None:
         "ok": True,
         "docs_checked": [str(path.relative_to(ROOT)) for path in REQUIRED_DOCS],
         "contract_routes": REQUIRED_CONTRACT_STRINGS,
-        "runtime_routes_added": False,
+        "runtime_routes_added": True,
         "legacy_frontend_copied": False,
     }
     print(json.dumps(result, indent=2))

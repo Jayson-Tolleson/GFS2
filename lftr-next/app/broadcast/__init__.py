@@ -1,1 +1,1 @@
-"""Placeholder package for future LFTR broadcast/watch modules."""
+"""Compact LFTR broadcast/watch runtime package."""

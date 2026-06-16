@@ -1,0 +1,21 @@
+[project]
+name = "lftr-next"
+version = "0.1.0"
+description = "LFTR Next marine intelligence globe mock architecture"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.111,<1.0",
+  "uvicorn[standard]>=0.30,<1.0",
+  "pydantic-settings>=2.3,<3.0",
+]
+
+[project.optional-dependencies]
+dev = []
+postgis = ["psycopg[binary]>=3.2,<4.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app", "app.api", "app.core", "app.schemas", "app.services", "app.fields", "app.spatial", "app.providers"]
